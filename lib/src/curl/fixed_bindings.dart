@@ -4,9 +4,16 @@ import 'dart:ffi' as ffi;
 
 import 'package:curl_http/src/curl/bindings.g.dart';
 
+// ignore: constant_identifier_names
+const CURLVERSION_NOW = CURLversion.CURLVERSION_ELEVENTH;
+
 extension FixedBindings on Bindings {
   int curl_easy_setopt_int(ffi.Pointer<CURL> curl, int option, int parameter) {
     return _setoptIntFunc(addresses.$curl_easy_setopt)(curl, option, parameter);
+  }
+
+  int curl_easy_setopt_off(ffi.Pointer<CURL> curl, int option, int parameter) {
+    return _setoptOffFunc(addresses.$curl_easy_setopt)(curl, option, parameter);
   }
 
   int curl_easy_setopt_ptr(ffi.Pointer<CURL> curl, int option, ffi.Pointer<ffi.Void> parameter) {
@@ -24,13 +31,23 @@ extension FixedBindings on Bindings {
     return _setoptIntFunc(addresses.$curl_multi_setopt)(curl, option, parameter);
   }
 
+  int curl_multi_setopt_off(ffi.Pointer<CURLM> curl, int option, int parameter) {
+    return _setoptOffFunc(addresses.$curl_multi_setopt)(curl, option, parameter);
+  }
+
   int curl_multi_setopt_ptr(ffi.Pointer<CURLM> curl, int option, ffi.Pointer<ffi.Void> parameter) {
     return _setoptPtrFunc(addresses.$curl_multi_setopt)(curl, option, parameter);
   }
 
   int Function(ffi.Pointer<ffi.Void>, int, int) _setoptIntFunc<T extends ffi.NativeFunction>(ffi.Pointer<T> pointer) {
     return pointer
-        .cast<ffi.NativeFunction<ffi.Int32 Function(ffi.Pointer<ffi.Void>, ffi.Int32, ffi.Long)>>()
+        .cast<ffi.NativeFunction<ffi.Int32 Function(ffi.Pointer<ffi.Void>, ffi.Int32, ffi.Int)>>()
+        .asFunction<int Function(ffi.Pointer<ffi.Void>, int, int)>();
+  }
+
+  int Function(ffi.Pointer<ffi.Void>, int, int) _setoptOffFunc<T extends ffi.NativeFunction>(ffi.Pointer<T> pointer) {
+    return pointer
+        .cast<ffi.NativeFunction<ffi.Int32 Function(ffi.Pointer<ffi.Void>, ffi.Int32, ffi.Int64)>>()
         .asFunction<int Function(ffi.Pointer<ffi.Void>, int, int)>();
   }
 

@@ -3,7 +3,7 @@ import 'dart:ffi';
 import 'package:curl_http/curl.dart';
 import 'package:curl_http/src/curl/bindings.g.dart';
 import 'package:curl_http/src/curl/curl_base.dart';
-import 'package:curl_http/src/curl/easy/curl_easy_options_service.dart';
+import 'package:curl_http/src/curl/easy/curl_header_internal.dart';
 import 'package:curl_http/src/curl/fixed_bindings.dart';
 import 'package:curl_http/src/curl/libcurl.dart';
 import 'package:curl_http/src/curl/utils.dart';
@@ -50,6 +50,42 @@ class CurlEasy extends CurlStorableHandle<CURL> {
     _throwIfNotOkResult(result);
   }
 
+  /// API docs: https://curl.se/libcurl/c/curl_easy_pause.html
+  void pause({required bool receive, required bool send}) {
+    var bitmask = CURLPAUSE_CONT;
+    if (receive) bitmask |= CURLPAUSE_RECV;
+    if (send) bitmask |= CURLPAUSE_SEND;
+    final result = libcurl.curl_easy_pause(handle, bitmask);
+    _throwIfNotOkResult(result);
+  }
+
+  /// API docs: https://curl.se/libcurl/c/curl_easy_header.html
+  CurlHeader header({
+    required String name,
+    required int index,
+    required Iterable<CurlHeaderOrigin> origin,
+    required int request,
+  }) {
+    final namePtr = name.toNativeUtf8();
+    final hout = malloc<Pointer<curl_header>>();
+    try {
+      final result = libcurl.curl_easy_header(handle, namePtr.cast(), index, origin.toBitMask(), request, hout);
+      if (result != CURLHcode.CURLHE_OK) {
+        throw CurlHeaderException(CurlHeaderCode.fromRawValue(result));
+      }
+      assert(hout.value != nullptr);
+      return curlHeaderToDart(hout.value);
+    } finally {
+      malloc.free(namePtr);
+      malloc.free(hout);
+    }
+  }
+
+  /// API docs: https://curl.se/libcurl/c/curl_easy_nextheader.html
+  Iterable<CurlHeader> headers({required Iterable<CurlHeaderOrigin> origin, required int request}) {
+    return CurlHeaderIterable(easyHandle: this, origin: origin, request: request);
+  }
+
   /// API docs: https://curl.se/libcurl/c/curl_easy_setopt.html
   void setOptionString(CurlEasyOption option, String? parameter) {
     final parameterPtr = parameter?.toNativeUtf8();
@@ -70,6 +106,11 @@ class CurlEasy extends CurlStorableHandle<CURL> {
   /// API docs: https://curl.se/libcurl/c/curl_easy_setopt.html
   void setOptionInt(CurlEasyOption option, int parameter) {
     _setOptionOrThrow(libcurl.curl_easy_setopt_int, option, parameter);
+  }
+
+  /// API docs: https://curl.se/libcurl/c/curl_easy_setopt.html
+  void setOptionOff(CurlEasyOption option, int parameter) {
+    _setOptionOrThrow(libcurl.curl_easy_setopt_off, option, parameter);
   }
 
   /// API docs: https://curl.se/libcurl/c/curl_easy_setopt.html
@@ -146,9 +187,11 @@ class CurlEasy extends CurlStorableHandle<CURL> {
     }
   }
 
-  static void _throwIfNotOkResult(int result) {
-    if (result != CURLcode.CURLE_OK) {
-      throw CurlEasyException(CurlEasyCode.fromRawValue(result));
+  void _throwIfNotOkResult(int result) {
+    if (result == CURLcode.CURLE_PROXY) {
+      throw CurlProxyException(info.proxyError);
+    } else {
+      CurlEasyException.throwIfNotOkResult(result);
     }
   }
 }

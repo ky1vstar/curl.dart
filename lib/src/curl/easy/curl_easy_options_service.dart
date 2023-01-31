@@ -16,6 +16,27 @@ class CurlEasyOptionsService {
   CurlReadFunc? _readFunc;
   CurlWriteFunc? _writeFunc;
   CurlHeaderFunc? _headerFunc;
+  CurlSeekFunc? _seekFunc;
+
+  void _setOptionStrings(CurlEasyOption option, Iterable<String>? parameter) {
+    final slist = parameter == null ? null : CurlSlist.from(parameter);
+    // TODO: manage slist lifecycle
+    easyHandle.setOptionSlist(option, slist);
+  }
+
+  Iterable<String>? _mapHeaders(Map<String, String?>? headers) {
+    return headers?.entries.map((entry) {
+      final key = entry.key;
+      final value = entry.value;
+      if (value == null) {
+        return "$key:";
+      } else if (value.isEmpty) {
+        return "$key;";
+      } else {
+        return "$key: $value";
+      }
+    });
+  }
 
   //region Behavior options
   /// API docs: https://curl.se/libcurl/c/CURLOPT_VERBOSE.html
@@ -66,18 +87,21 @@ class CurlEasyOptionsService {
   }
 
   /// API docs:
+  ///  - https://curl.se/libcurl/c/CURLOPT_SEEKFUNCTION.html
+  ///  - https://curl.se/libcurl/c/CURLOPT_SEEKDATA.html
+  set seekFunction(CurlSeekFunc? seekFunc) {
+    easyHandle.setOptionPointer(CurlEasyOption.SEEKFUNCTION, seekFunc == null ? nullptr : _seekCallbackPtr);
+    easyHandle.setOptionPointer(CurlEasyOption.SEEKDATA, seekFunc == null ? nullptr : easyHandle.handle);
+    _seekFunc = seekFunc;
+  }
+
+  /// API docs:
   ///  - https://curl.se/libcurl/c/CURLOPT_HEADERFUNCTION.html
   ///  - https://curl.se/libcurl/c/CURLOPT_HEADERDATA.html
   set headerFunction(CurlHeaderFunc? headerFunc) {
-    if (headerFunc == null) {
-      easyHandle.setOptionPointer(CurlEasyOption.HEADERFUNCTION, nullptr);
-      easyHandle.setOptionPointer(CurlEasyOption.HEADERDATA, nullptr);
-      _headerFunc = null;
-    } else {
-      easyHandle.setOptionPointer(CurlEasyOption.HEADERFUNCTION, _headerCallbackPtr);
-      easyHandle.setOptionPointer(CurlEasyOption.HEADERDATA, easyHandle.handle);
-      _headerFunc = headerFunc;
-    }
+    easyHandle.setOptionPointer(CurlEasyOption.HEADERFUNCTION, headerFunc == null ? nullptr : _headerCallbackPtr);
+    easyHandle.setOptionPointer(CurlEasyOption.HEADERDATA, headerFunc == null ? nullptr : easyHandle.handle);
+    _headerFunc = headerFunc;
   }
   //endregion
 
@@ -176,16 +200,79 @@ class CurlEasyOptionsService {
   /// API docs: https://curl.se/libcurl/c/CURLOPT_FOLLOWLOCATION.html
   set followLocation(bool followLocation) => easyHandle.setOptionBool(CurlEasyOption.FOLLOWLOCATION, followLocation);
 
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_MAXREDIRS.html
+  set maxRedirects(int maxRedirects) => easyHandle.setOptionInt(CurlEasyOption.MAXREDIRS, maxRedirects);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_POST.html
+  set post(bool post) => easyHandle.setOptionBool(CurlEasyOption.POST, post);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_POSTFIELDSIZE_LARGE.html
+  set postFieldSize(int postFieldSize) => easyHandle.setOptionOff(CurlEasyOption.POSTFIELDSIZE_LARGE, postFieldSize);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_REFERER.html
+  set referer(String? referer) => easyHandle.setOptionString(CurlEasyOption.REFERER, referer);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_USERAGENT.html
+  set userAgent(String? userAgent) => easyHandle.setOptionString(CurlEasyOption.USERAGENT, userAgent);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_HTTPHEADER.html
+  set httpHeader(Map<String, String?>? httpHeader) =>
+      _setOptionStrings(CurlEasyOption.HTTPHEADER, _mapHeaders(httpHeader));
+
+  /// API docs: https://curl.se/libcurl/c/HEADEROPT.html
+  set headerOptions(CurlHeaderBehaviour headerOptions) =>
+      easyHandle.setOptionInt(CurlEasyOption.HEADEROPT, headerOptions.rawValue);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_PROXYHEADER.html
+  set proxyHeader(Map<String, String?>? proxyHeader) =>
+      _setOptionStrings(CurlEasyOption.PROXYHEADER, _mapHeaders(proxyHeader));
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_HTTP200ALIASES.html
+  set http200Aliases(Iterable<int>? http200Aliases) =>
+      _setOptionStrings(CurlEasyOption.HTTP200ALIASES, http200Aliases?.map((e) => e.toString()));
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_COOKIE.html
+  set cookie(String? cookie) => easyHandle.setOptionString(CurlEasyOption.COOKIE, cookie);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_COOKIEFILE.html
+  set cookieFile(String? cookieFile) => easyHandle.setOptionString(CurlEasyOption.COOKIEFILE, cookieFile);
+
   /// API docs: https://curl.se/libcurl/c/CURLOPT_COOKIEJAR.html
-  set cookieJar(String cookieJar) => easyHandle.setOptionString(CurlEasyOption.COOKIEJAR, cookieJar);
+  set cookieJar(String? cookieJar) => easyHandle.setOptionString(CurlEasyOption.COOKIEJAR, cookieJar);
 
   /// API docs: https://curl.se/libcurl/c/CURLOPT_COOKIESESSION.html
-  void startNewCookieSession() => easyHandle.setOptionBool(CurlEasyOption.COOKIESESSION, true);
+  set cookieSession(bool cookieSession) => easyHandle.setOptionBool(CurlEasyOption.COOKIESESSION, cookieSession);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_COOKIELIST.html
+  set cookieList(String? cookieList) => easyHandle.setOptionString(CurlEasyOption.COOKIELIST, cookieList);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_HTTPGET.html
+  set httpGet(bool httpGet) => easyHandle.setOptionBool(CurlEasyOption.HTTPGET, httpGet);
+  //endregion
+
+  //region Protocol options
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_CUSTOMREQUEST.html
+  set customRequest(String? customRequest) => easyHandle.setOptionString(CurlEasyOption.CUSTOMREQUEST, customRequest);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_NOBODY.html
+  set noBody(bool noBody) => easyHandle.setOptionBool(CurlEasyOption.NOBODY, noBody);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_INFILESIZE_LARGE.html
+  set inFileSize(int inFileSize) => easyHandle.setOptionOff(CurlEasyOption.INFILESIZE_LARGE, inFileSize);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_UPLOAD.html
+  set upload(bool upload) => easyHandle.setOptionBool(CurlEasyOption.UPLOAD, upload);
   //endregion
 
   //region Connection options
   /// API docs: https://curl.se/libcurl/c/CURLOPT_TIMEOUT_MS.html
   set timeout(Duration timeout) => easyHandle.setOptionInt(CurlEasyOption.TIMEOUT_MS, timeout.inMilliseconds);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_FRESH_CONNECT.html
+  set freshConnect(bool freshConnect) => easyHandle.setOptionBool(CurlEasyOption.FRESH_CONNECT, freshConnect);
+
+  /// API docs: https://curl.se/libcurl/c/CURLOPT_FORBID_REUSE.html
+  set forbidReuse(bool forbidReuse) => easyHandle.setOptionBool(CurlEasyOption.FORBID_REUSE, forbidReuse);
 
   /// API docs: https://curl.se/libcurl/c/CURLOPT_CONNECTTIMEOUT_MS.html
   set connectTimeout(Duration connectTimeout) =>
@@ -237,6 +324,31 @@ int _readCallback(
     pause: () => CURL_READFUNC_PAUSE,
     bytesRead: (bytesRead) => bytesRead,
   );
+}
+
+final _seekCallbackPtr =
+    Pointer.fromFunction<Size Function(Pointer<Void>, curl_off_t, Int32)>(_seekCallback, CURL_SEEKFUNC_FAIL);
+
+int _seekCallback(
+  Pointer<Void> userdata,
+  int offset,
+  int origin,
+) {
+  final instance = CurlStorableHandle.existingInstance<CurlEasy>(userdata);
+
+  final seekFunc = instance.options._seekFunc;
+  if (seekFunc == null) {
+    return CURL_SEEKFUNC_FAIL;
+  }
+
+  switch (seekFunc(origin, CurlSeekOrigin.values[origin])) {
+    case CurlSeekFuncResult.ok:
+      return CURL_SEEKFUNC_OK;
+    case CurlSeekFuncResult.fail:
+      return CURL_SEEKFUNC_FAIL;
+    case CurlSeekFuncResult.cantSeek:
+      return CURL_SEEKFUNC_CANTSEEK;
+  }
 }
 
 const _headerCallbackExceptionalReturn =

@@ -3,15 +3,16 @@ import 'dart:typed_data';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'curl_io_func.freezed.dart';
+part 'curl_callbacks.freezed.dart';
 
-typedef CurlIoFunc<T> = T Function(Pointer<Char> buffer, int size, int nitems);
-typedef TypedViewCurlIoFunc<T> = T Function(Uint8List bytesView);
-typedef CurlReadFunc = CurlIoFunc<CurlReadFuncResult>;
-typedef CurlWriteFunc = CurlIoFunc<CurlWriteFuncResult>;
-typedef CurlHeaderFunc = CurlIoFunc<int>;
+typedef CurlReadWriteFunc<T> = T Function(Pointer<Char> buffer, int size, int nitems);
+typedef TypedViewCurlReadWriteFunc<T> = T Function(Uint8List bytesView);
+typedef CurlReadFunc = CurlReadWriteFunc<CurlReadFuncResult>;
+typedef CurlWriteFunc = CurlReadWriteFunc<CurlWriteFuncResult>;
+typedef CurlHeaderFunc = CurlReadWriteFunc<int>;
+typedef CurlSeekFunc = CurlSeekFuncResult Function(int offset, CurlSeekOrigin origin);
 
-CurlIoFunc<T> typedViewIoCallback<T>(TypedViewCurlIoFunc<T> func) {
+CurlReadWriteFunc<T> typedViewIoCallback<T>(TypedViewCurlReadWriteFunc<T> func) {
   return (buffer, size, nitems) => func(buffer.cast<Uint8>().asTypedList(size * nitems));
 }
 
@@ -31,4 +32,16 @@ class CurlWriteFuncResult with _$CurlWriteFuncResult {
   const factory CurlWriteFuncResult.pause() = CurlWriteFuncPauseResult;
 
   const factory CurlWriteFuncResult.bytesWritten(int bytesWritten) = CurlWriteFuncBytesWrittenResult;
+}
+
+enum CurlSeekFuncResult {
+  ok,
+  fail,
+  cantSeek,
+}
+
+enum CurlSeekOrigin {
+  set,
+  current,
+  end,
 }

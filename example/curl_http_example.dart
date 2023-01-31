@@ -5,8 +5,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:curl_http/curl.dart';
+import 'package:curl_http/src/curl_client.dart';
 
-void main() async {
+void main2() async {
   final controller = StreamController<Uint8List>();
   controller.stream.cast<List<int>>().pipe(stdout);
 
@@ -15,6 +16,10 @@ void main() async {
   // easy.options.startNewCookieSession();
   easy.options.cookieJar = "cookies";
   easy.options.followLocation = true;
+  easy.options.readFunction = (ptr, size, nmemb) {
+    print("readFunction");
+    return const CurlReadFuncResult.bytesRead(0);
+  };
   easy.options.writeFunction = (ptr, size, nmemb) {
     print("\n\nonWrite\n\n");
     final length = size * nmemb;
@@ -47,4 +52,18 @@ void main() async {
   print(easy.info.totalTime);
   print(easy.info.sslEngines);
   print(easy.info.cookieList);
+}
+
+void main() async {
+  print(Curl.version);
+  print(Curl.versionInfo);
+  print(Curl.availableSslBackends);
+  // Curl.sslBackendId = CurlSslBackendId.SECURETRANSPORT;
+  Curl.sslBackendName = "OpenSSL";
+
+  final client = CurlClient();
+  final response = await client.get(Uri.parse("https://google.com"));
+  print(response.body);
+  print(response.headers);
+  print(response.isRedirect);
 }
