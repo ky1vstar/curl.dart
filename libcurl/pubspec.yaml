@@ -1,17 +1,15 @@
-name: curl_http
+name: libcurl
 description: A starting point for Dart libraries or applications.
 version: 1.0.0
-# homepage: https://www.example.com
+# repository: https://github.com/my_org/my_repo
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
 
-dependencies: 
+dependencies:
   ffi: ^2.0.1
   freezed_annotation: ^2.2.0
   http: ^0.13.5
-  libcurl:
-    path: libcurl/
   meta: ^1.8.0
 
 dev_dependencies:

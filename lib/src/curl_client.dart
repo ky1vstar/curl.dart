@@ -3,9 +3,9 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:curl_http/curl.dart';
 import 'package:ffi/ffi.dart';
 import 'package:http/http.dart';
+import 'package:libcurl/libcurl.dart';
 
 final _kFoldedHeaderPrefixRegExp = RegExp(r"[ \t]");
 
