@@ -11,7 +11,7 @@ dependencies:
   freezed_annotation: ^2.2.0
   http: ^0.13.5
   libcurl:
-    path: libcurl/
+    path: ../libcurl
   meta: ^1.8.0
 
 dev_dependencies:
