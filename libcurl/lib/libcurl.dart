@@ -1,4 +1,4 @@
-library curl;
+library libcurl;
 
 export 'src/curl.dart';
 export 'src/curl_slist.dart';
@@ -21,4 +21,5 @@ export 'src/easy/curl_proxy_type.dart';
 export 'src/exceptions.dart';
 export 'src/multi/curl_msg.dart';
 export 'src/multi/curl_multi.dart';
+export 'src/multi/curl_multi_code.dart';
 export 'src/multi/curl_multi_option.dart';

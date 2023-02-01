@@ -3,8 +3,8 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:libcurl/libcurl.dart';
-import 'package:libcurl/src/bindings.g.dart';
-import 'package:libcurl/src/libcurl.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
+import 'package:libcurl/src/ffi/libcurl.dart';
 
 class CurlHeaderIterable with IterableMixin<CurlHeader> {
   CurlHeaderIterable({required this.easyHandle, required this.origin, required this.request});

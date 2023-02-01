@@ -1,7 +1,8 @@
 name: curl_flutter_libs
 description: A new Flutter plugin project.
 version: 0.0.1
-homepage:
+homepage: https://github.com/ky1vstar/curl.dart/tree/master/curl_flutter_libs
+issue_tracker: https://github.com/ky1vstar/curl.dart/issues
 
 environment:
   sdk: '>=2.12.0 <3.0.0'

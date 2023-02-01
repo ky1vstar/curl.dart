@@ -1,6 +1,6 @@
 // ignore_for_file: constant_identifier_names
 
-import 'package:libcurl/src/bindings.g.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
 
 // `static const int CURLINFO_(\w+).*;`
 // ->

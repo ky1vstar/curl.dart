@@ -3,8 +3,8 @@
 import 'dart:ffi';
 
 import 'package:libcurl/libcurl.dart';
-import 'package:libcurl/src/bindings.g.dart';
 import 'package:libcurl/src/curl_base.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
 import 'package:libcurl/src/utils.dart';
 
 /// API docs: https://curl.se/libcurl/c/curl_easy_setopt.html

@@ -5,12 +5,15 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:libcurl/libcurl.dart';
+import 'package:libcurl/open.dart';
 
 void main() async {
+  // open.override(() => DynamicLibrary.open("/usr/local/curl/lib/libcurl.dylib"));
+
   print(Curl.version);
   print(Curl.versionInfo);
   print(Curl.availableSslBackends);
-  // Curl.sslBackendId = CurlSslBackendId.SECURETRANSPORT;
+  Curl.sslBackendId = CurlSslBackendId.SECURETRANSPORT;
   Curl.sslBackendName = "OpenSSL";
 
   final controller = StreamController<Uint8List>();

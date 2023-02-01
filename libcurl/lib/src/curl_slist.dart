@@ -2,10 +2,10 @@ import 'dart:collection';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:libcurl/src/bindings.g.dart';
 import 'package:libcurl/src/curl_base.dart';
 import 'package:libcurl/src/exceptions.dart';
-import 'package:libcurl/src/libcurl.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
+import 'package:libcurl/src/ffi/libcurl.dart';
 
 class CurlSlist extends CurlHotSwappableHandle<curl_slist> with IterableMixin<String> {
   /// API docs: https://curl.se/libcurl/c/curl_slist_append.html

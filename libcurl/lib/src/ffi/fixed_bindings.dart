@@ -2,7 +2,7 @@
 
 import 'dart:ffi' as ffi;
 
-import 'package:libcurl/src/bindings.g.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
 
 // ignore: constant_identifier_names
 const CURLVERSION_NOW = CURLversion.CURLVERSION_ELEVENTH;

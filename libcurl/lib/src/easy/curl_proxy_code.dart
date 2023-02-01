@@ -1,13 +1,15 @@
 // ignore_for_file: constant_identifier_names
 
-import 'package:libcurl/src/bindings.g.dart';
+import 'package:libcurl/libcurl.dart';
+import 'package:libcurl/src/curl_base.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
 
 // `static const int CURLPX_(\w+).*;`
 // ->
 // `$1(CURLproxycode.CURLPX_$1),\n`
 
 /// API docs: https://curl.se/libcurl/c/CURLINFO_PROXY_ERROR.html
-enum CurlProxyCode {
+enum CurlProxyCode with CurlCode {
   OK(CURLproxycode.CURLPX_OK),
 
   BAD_ADDRESS_TYPE(CURLproxycode.CURLPX_BAD_ADDRESS_TYPE),
@@ -91,5 +93,15 @@ enum CurlProxyCode {
     );
   }
 
+  @override
   final int rawValue;
+
+  static void throwIfNotOkResult(int result) {
+    if (result != CURLproxycode.CURLPX_OK) {
+      throw CurlCodeException(CurlProxyCode.fromRawValue(result));
+    }
+  }
+
+  @override
+  String? strError() => CurlEasyCode.PROXY.strError();
 }

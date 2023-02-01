@@ -2,11 +2,11 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:libcurl/libcurl.dart';
-import 'package:libcurl/src/bindings.g.dart';
 import 'package:libcurl/src/curl_base.dart';
 import 'package:libcurl/src/easy/curl_header_internal.dart';
-import 'package:libcurl/src/fixed_bindings.dart';
-import 'package:libcurl/src/libcurl.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
+import 'package:libcurl/src/ffi/fixed_bindings.dart';
+import 'package:libcurl/src/ffi/libcurl.dart';
 import 'package:libcurl/src/utils.dart';
 
 /// API docs: https://curl.se/libcurl/c/libcurl-easy.html
@@ -70,9 +70,7 @@ class CurlEasy extends CurlStorableHandle<CURL> {
     final hout = malloc<Pointer<curl_header>>();
     try {
       final result = libcurl.curl_easy_header(handle, namePtr.cast(), index, origin.toBitMask(), request, hout);
-      if (result != CURLHcode.CURLHE_OK) {
-        throw CurlHeaderException(CurlHeaderCode.fromRawValue(result));
-      }
+      CurlHeaderCode.throwIfNotOkResult(result);
       assert(hout.value != nullptr);
       return curlHeaderToDart(hout.value);
     } finally {
@@ -189,9 +187,9 @@ class CurlEasy extends CurlStorableHandle<CURL> {
 
   void _throwIfNotOkResult(int result) {
     if (result == CURLcode.CURLE_PROXY) {
-      throw CurlProxyException(info.proxyError);
+      throw CurlCodeException(info.proxyError);
     } else {
-      CurlEasyException.throwIfNotOkResult(result);
+      CurlEasyCode.throwIfNotOkResult(result);
     }
   }
 }

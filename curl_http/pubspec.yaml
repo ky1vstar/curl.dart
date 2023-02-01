@@ -1,46 +1,24 @@
 name: curl_http
 description: A starting point for Dart libraries or applications.
 version: 1.0.0
-# homepage: https://www.example.com
+homepage: https://github.com/ky1vstar/curl.dart/tree/master/curl_http
+issue_tracker: https://github.com/ky1vstar/curl.dart/issues
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
 
-dependencies: 
-  ffi: ^2.0.1
+dependencies:
   freezed_annotation: ^2.2.0
   http: ^0.13.5
   libcurl:
-    path: ../libcurl
   meta: ^1.8.0
 
 dev_dependencies:
   build_runner: ^2.3.3
-  ffigen: ^7.2.4
   freezed: ^2.3.2
   lint: ^2.0.1
   test: ^1.16.0
 
-ffigen:
-  name: Bindings
-  output: 'lib/src/curl/bindings.g.dart'
-  description: Auto-generated, internal bindings to libcurl
-  headers:
-    entry-points: [ '/usr/local/curl/include/curl/curl.h' ]
-  functions:
-    include: [ 'curl.*', 'CURL.*' ]
-    rename:
-      '(curl_.*_setopt)': '$$1'
-      curl_easy_getinfo: '$curl_easy_getinfo'
-    symbol-address:
-      include:
-        - 'curl_.*_cleanup'
-        - 'curl_.*_setopt'
-        - 'curl_slist_free_all'
-        - 'curl_easy_getinfo'
-  structs:
-    include: [ 'curl.*', 'CURL.*' ]
-  macros:
-    include: [ 'curl.*', 'CURL.*' ]
-  globals:
-    include: [ 'curl.*', 'CURL.*' ]
+dependency_overrides:
+  libcurl:
+    path: ../libcurl

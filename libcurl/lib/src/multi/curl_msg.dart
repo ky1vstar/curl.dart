@@ -2,7 +2,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:libcurl/libcurl.dart';
-import 'package:libcurl/src/bindings.g.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
 
 part 'curl_msg.freezed.dart';
 

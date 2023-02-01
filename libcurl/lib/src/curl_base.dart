@@ -13,6 +13,12 @@ abstract class CurlOption {
   int get rawValue;
 }
 
+abstract class CurlCode {
+  int get rawValue;
+
+  String? strError() => null;
+}
+
 abstract class CurlHandle<T extends NativeType> implements Finalizable {
   CurlHandle(
     this._handle, {

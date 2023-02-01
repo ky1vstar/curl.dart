@@ -1,6 +1,8 @@
 // ignore_for_file: constant_identifier_names
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:libcurl/src/bindings.g.dart';
+import 'package:libcurl/libcurl.dart';
+import 'package:libcurl/src/curl_base.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
 
 part 'curl_header.freezed.dart';
 
@@ -59,7 +61,7 @@ extension CurlHeaderOriginIterable on Iterable<CurlHeaderOrigin> {
 // `$1(CURLHcode.CURLHE_$1),\n`
 
 /// API docs: https://curl.se/libcurl/c/curl_easy_header.html#RETURN
-enum CurlHeaderCode {
+enum CurlHeaderCode with CurlCode {
   OK(CURLHcode.CURLHE_OK),
 
   BADINDEX(CURLHcode.CURLHE_BADINDEX),
@@ -89,5 +91,12 @@ enum CurlHeaderCode {
     );
   }
 
+  @override
   final int rawValue;
+
+  static void throwIfNotOkResult(int result) {
+    if (result != CURLHcode.CURLHE_OK) {
+      throw CurlCodeException(CurlHeaderCode.fromRawValue(result));
+    }
+  }
 }

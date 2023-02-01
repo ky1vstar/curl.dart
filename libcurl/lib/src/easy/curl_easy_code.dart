@@ -3,15 +3,17 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:libcurl/src/bindings.g.dart';
-import 'package:libcurl/src/libcurl.dart';
+import 'package:libcurl/libcurl.dart';
+import 'package:libcurl/src/curl_base.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
+import 'package:libcurl/src/ffi/libcurl.dart';
 
 // `static const int CURL(E?)_(\w+).*;`
 // ->
 // `$2(CURLcode.CURL$1_$2),\n`
 
-/// API docs: https://curl.se/libcurl/c/libcurl-errors.html
-enum CurlEasyCode {
+/// API docs: https://curl.se/libcurl/c/libcurl-errors.html#CURLcode
+enum CurlEasyCode with CurlCode {
   OK(CURLcode.CURLE_OK),
 
   UNSUPPORTED_PROTOCOL(CURLcode.CURLE_UNSUPPORTED_PROTOCOL),
@@ -227,8 +229,16 @@ enum CurlEasyCode {
     );
   }
 
+  @override
   final int rawValue;
 
+  static void throwIfNotOkResult(int result) {
+    if (result != CURLcode.CURLE_OK) {
+      throw CurlCodeException(CurlEasyCode.fromRawValue(result));
+    }
+  }
+
+  @override
   String? strError() {
     switch (this) {
       case CurlEasyCode.LAST:

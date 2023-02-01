@@ -4,8 +4,8 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:libcurl/src/bindings.g.dart';
 import 'package:libcurl/src/curl_base.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
 
 final _stdlib = DynamicLibrary.process();
 

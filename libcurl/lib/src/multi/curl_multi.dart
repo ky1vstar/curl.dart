@@ -2,9 +2,9 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:libcurl/libcurl.dart';
-import 'package:libcurl/src/bindings.g.dart';
 import 'package:libcurl/src/curl_base.dart';
-import 'package:libcurl/src/libcurl.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
+import 'package:libcurl/src/ffi/libcurl.dart';
 
 /// https://curl.se/libcurl/c/libcurl-multi.html
 class CurlMulti extends CurlHandle<CURLM> {
@@ -87,7 +87,7 @@ class CurlMulti extends CurlHandle<CURLM> {
 
   static void _throwIfNotOkResult(int result) {
     if (result != CURLMcode.CURLM_OK) {
-      throw CurlMultiException(result);
+      throw CurlCodeException(CurlMultiCode.fromRawValue(result));
     }
   }
 }

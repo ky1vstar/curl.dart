@@ -4,9 +4,9 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:libcurl/libcurl.dart';
-import 'package:libcurl/src/bindings.g.dart';
-import 'package:libcurl/src/fixed_bindings.dart';
-import 'package:libcurl/src/libcurl.dart';
+import 'package:libcurl/src/ffi/bindings.g.dart';
+import 'package:libcurl/src/ffi/fixed_bindings.dart';
+import 'package:libcurl/src/ffi/libcurl.dart';
 import 'package:libcurl/src/utils.dart';
 
 abstract class Curl {
@@ -61,15 +61,18 @@ abstract class Curl {
   /// API docs: https://curl.se/libcurl/c/curl_global_init.html
   static void globalInit() {
     final result = libcurl.curl_global_init(CURL_GLOBAL_DEFAULT);
-    CurlEasyException.throwIfNotOkResult(result);
+    CurlEasyCode.throwIfNotOkResult(result);
   }
 
+  /// API docs: https://curl.se/libcurl/c/curl_global_sslset.html
   static List<CurlSslBackend> get availableSslBackends {
     final availPtr = malloc<Pointer<Pointer<curl_ssl_backend>>>();
     try {
       final result = libcurl.curl_global_sslset(curl_sslbackend.CURLSSLBACKEND_NONE, nullptr, availPtr);
-      if (result != CURLsslset.CURLSSLSET_UNKNOWN_BACKEND) {
-        // throw
+      if (result == CURLsslset.CURLSSLSET_NO_BACKENDS) {
+        return [];
+      } else if (result != CURLsslset.CURLSSLSET_UNKNOWN_BACKEND) {
+        throw CurlCodeException(CurlSslSetCode.fromRawValue(result));
       }
       final avail = availPtr.value;
       assert(avail != nullptr);
@@ -83,22 +86,18 @@ abstract class Curl {
     }
   }
 
+  /// API docs: https://curl.se/libcurl/c/curl_global_sslset.html
   static set sslBackendId(CurlSslBackendId sslBackendId) {
     final result = libcurl.curl_global_sslset(sslBackendId.rawValue, nullptr, nullptr);
-    if (result != CURLsslset.CURLSSLSET_OK) {
-      // throw
-      print(result);
-    }
+    CurlSslSetCode.throwIfNotOkResult(result);
   }
 
+  /// API docs: https://curl.se/libcurl/c/curl_global_sslset.html
   static set sslBackendName(String sslBackendName) {
     final sslBackendNamePtr = sslBackendName.toNativeUtf8();
     try {
       final result = libcurl.curl_global_sslset(-1, sslBackendNamePtr.cast(), nullptr);
-      if (result != CURLsslset.CURLSSLSET_OK) {
-        // throw
-        print(result);
-      }
+      CurlSslSetCode.throwIfNotOkResult(result);
     } finally {
       malloc.free(sslBackendNamePtr);
     }
